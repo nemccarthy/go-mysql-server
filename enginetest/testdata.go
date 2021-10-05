@@ -483,6 +483,33 @@ func createSubsetTestData(t *testing.T, harness Harness, includedTables []string
 		})
 	}
 
+	if includeTable(includedTables, "json_table") {
+		wrapInTransaction(t, myDb, harness, func() {
+			table, err = harness.NewTable(myDb, "json_table", sql.Schema{
+				{Name: "pk", Type: sql.Int32, Source: "json_table", PrimaryKey: true},
+				{Name: "js", Type: sql.JSON, Source: "json_table", Nullable: true},
+			})
+
+			if err == nil {
+				InsertRows(t, NewContext(harness), mustInsertableTable(t, table),
+					sql.NewRow(0, sql.MustJSON(`0`)),
+					sql.NewRow(1, sql.MustJSON(`"q"`)),
+					sql.NewRow(2, sql.MustJSON(`false`)),
+					sql.NewRow(3, sql.MustJSON(`null`)),
+					sql.NewRow(4, sql.MustJSON(`{"a":1,"b":"xyz","c":true}`)),
+					sql.NewRow(13, sql.MustJSON(`{
+							"key with spaces": 1,
+							"key\"with\"dquotes": 2,
+							"key'with'squotes": 3,
+							"key\\with\\backslashes": 4
+						}`)),
+				)
+			} else {
+				t.Logf("Warning: could not create table %s: %s", "one_pk", err)
+			}
+		})
+	}
+
 	if versionedHarness, ok := harness.(VersionedDBHarness); ok &&
 		includeTable(includedTables, "myhistorytable") {
 		versionedDb, ok := myDb.(sql.VersionedDatabase)

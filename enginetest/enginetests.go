@@ -49,6 +49,10 @@ func TestQueries(t *testing.T, harness Harness) {
 		TestQuery(t, harness, engine, tt.Query, tt.Expected, tt.ExpectedColumns, tt.Bindings)
 	}
 
+	for _, tt := range JsonQueries {
+		TestQuery(t, harness, engine, tt.Query, tt.Expected, tt.ExpectedColumns, tt.Bindings)
+	}
+
 	if keyless, ok := harness.(KeylessTableHarness); ok && keyless.SupportsKeylessTables() {
 		for _, tt := range KeylessQueries {
 			TestQuery(t, harness, engine, tt.Query, tt.Expected, tt.ExpectedColumns, tt.Bindings)

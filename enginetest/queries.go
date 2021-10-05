@@ -5409,6 +5409,44 @@ var KeylessQueries = []QueryTest{
 	},
 }
 
+var JsonQueries = []QueryTest{
+	{
+		Query: `SELECT * FROM json_table`,
+		Expected: []sql.Row{
+			{0, sql.MustJSON(`0`)},
+			{1, sql.MustJSON(`"q"`)},
+			{2, sql.MustJSON(`false`)},
+			{3, sql.MustJSON(`null`)},
+			{4, sql.MustJSON(`{"a":1,"b":"xyz","c":true}`)},
+			{13, sql.MustJSON(`{
+							"key with spaces": 1,
+							"key\"with\"dquotes": 2,
+							"key'with'squotes": 3,
+							"key\\with\\backslashes": 4 }`),
+			},
+		},
+	},
+	{
+		//Query: `SELECT pk, JSON_EXTRACT(json_table.js, '$.\"a\"') FROM json_table ORDER BY pk`,
+		Query: `SELECT pk, JSON_EXTRACT(json_table.js, '$."a"') FROM json_table ORDER BY pk`,
+		Expected: []sql.Row{
+			{0, sql.MustJSON(`null`)},
+			{1, sql.MustJSON(`null`)},
+			{2, sql.MustJSON(`null`)},
+			{3, sql.MustJSON(`null`)},
+			{4, sql.MustJSON(`1`)},
+			{13, sql.MustJSON(`null`)},
+		},
+	},
+	{
+		//Query: `SELECT pk, JSON_EXTRACT(json_table.js, '$.\"b\"') FROM json_table WHERE JSON_EXTRACT(json_table.js, '$.\"b\"') = JSON_EXTRACT('\"xyz\"', '$')`,
+		Query: `SELECT pk, JSON_EXTRACT(json_table.js, '$."b"') FROM json_table WHERE JSON_EXTRACT(json_table.js, '$."b"') = JSON_EXTRACT('"xyz"', '$')`,
+		Expected: []sql.Row{
+			{4, sql.MustJSON(`"xyz"`)},
+		},
+	},
+}
+
 // Queries that are known to be broken in the engine.
 var BrokenQueries = []QueryTest{
 	{
