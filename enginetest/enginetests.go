@@ -3178,7 +3178,7 @@ func TestWindowRowFrames(t *testing.T, harness Harness) {
 func TestWindowRangeFrames(t *testing.T, harness Harness) {
 	e := NewEngine(t, harness)
 	defer e.Close()
-	
+
 	RunQuery(t, e, harness, "CREATE TABLE a (x INTEGER PRIMARY KEY, y INTEGER, z INTEGER)")
 	RunQuery(t, e, harness, "INSERT INTO a VALUES (0,0,0), (1,1,0), (2,2,0), (3,0,0), (4,1,0), (5,3,0)")
 	TestQuery(t, harness, e,
