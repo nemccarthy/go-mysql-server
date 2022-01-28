@@ -3,6 +3,8 @@
 package aggregation
 
 import (
+	"fmt"
+
 	"github.com/dolthub/go-mysql-server/sql"
 	"github.com/dolthub/go-mysql-server/sql/expression"
 )
@@ -13,7 +15,7 @@ type RowsUnboundedPrecedingToNPrecedingFramer struct {
 
 var _ sql.WindowFramer = (*RowsUnboundedPrecedingToNPrecedingFramer)(nil)
 
-func NewRowsUnboundedPrecedingToNPrecedingFramer(frame sql.WindowFrame) (sql.WindowFramer, error) {
+func NewRowsUnboundedPrecedingToNPrecedingFramer(frame sql.WindowFrame, window *sql.Window) (sql.WindowFramer, error) {
 	unboundedPreceding := true
 	endNPreceding, err := expression.LiteralToInt(frame.EndNPreceding())
 	if err != nil {
@@ -33,7 +35,7 @@ type RowsUnboundedPrecedingToCurrentRowFramer struct {
 
 var _ sql.WindowFramer = (*RowsUnboundedPrecedingToCurrentRowFramer)(nil)
 
-func NewRowsUnboundedPrecedingToCurrentRowFramer(frame sql.WindowFrame) (sql.WindowFramer, error) {
+func NewRowsUnboundedPrecedingToCurrentRowFramer(frame sql.WindowFrame, window *sql.Window) (sql.WindowFramer, error) {
 	unboundedPreceding := true
 	endCurrentRow := true
 	return &RowsUnboundedPrecedingToCurrentRowFramer{
@@ -50,7 +52,7 @@ type RowsUnboundedPrecedingToNFollowingFramer struct {
 
 var _ sql.WindowFramer = (*RowsUnboundedPrecedingToNFollowingFramer)(nil)
 
-func NewRowsUnboundedPrecedingToNFollowingFramer(frame sql.WindowFrame) (sql.WindowFramer, error) {
+func NewRowsUnboundedPrecedingToNFollowingFramer(frame sql.WindowFrame, window *sql.Window) (sql.WindowFramer, error) {
 	unboundedPreceding := true
 	endNFollowing, err := expression.LiteralToInt(frame.EndNFollowing())
 	if err != nil {
@@ -70,7 +72,7 @@ type RowsUnboundedPrecedingToUnboundedFollowingFramer struct {
 
 var _ sql.WindowFramer = (*RowsUnboundedPrecedingToUnboundedFollowingFramer)(nil)
 
-func NewRowsUnboundedPrecedingToUnboundedFollowingFramer(frame sql.WindowFrame) (sql.WindowFramer, error) {
+func NewRowsUnboundedPrecedingToUnboundedFollowingFramer(frame sql.WindowFrame, window *sql.Window) (sql.WindowFramer, error) {
 	unboundedPreceding := true
 	unboundedFollowing := true
 	return &RowsUnboundedPrecedingToUnboundedFollowingFramer{
@@ -87,7 +89,7 @@ type RowsNPrecedingToNPrecedingFramer struct {
 
 var _ sql.WindowFramer = (*RowsNPrecedingToNPrecedingFramer)(nil)
 
-func NewRowsNPrecedingToNPrecedingFramer(frame sql.WindowFrame) (sql.WindowFramer, error) {
+func NewRowsNPrecedingToNPrecedingFramer(frame sql.WindowFrame, window *sql.Window) (sql.WindowFramer, error) {
 	startNPreceding, err := expression.LiteralToInt(frame.StartNPreceding())
 	if err != nil {
 		return nil, err
@@ -110,7 +112,7 @@ type RowsNPrecedingToCurrentRowFramer struct {
 
 var _ sql.WindowFramer = (*RowsNPrecedingToCurrentRowFramer)(nil)
 
-func NewRowsNPrecedingToCurrentRowFramer(frame sql.WindowFrame) (sql.WindowFramer, error) {
+func NewRowsNPrecedingToCurrentRowFramer(frame sql.WindowFrame, window *sql.Window) (sql.WindowFramer, error) {
 	startNPreceding, err := expression.LiteralToInt(frame.StartNPreceding())
 	if err != nil {
 		return nil, err
@@ -130,7 +132,7 @@ type RowsNPrecedingToNFollowingFramer struct {
 
 var _ sql.WindowFramer = (*RowsNPrecedingToNFollowingFramer)(nil)
 
-func NewRowsNPrecedingToNFollowingFramer(frame sql.WindowFrame) (sql.WindowFramer, error) {
+func NewRowsNPrecedingToNFollowingFramer(frame sql.WindowFrame, window *sql.Window) (sql.WindowFramer, error) {
 	startNPreceding, err := expression.LiteralToInt(frame.StartNPreceding())
 	if err != nil {
 		return nil, err
@@ -153,7 +155,7 @@ type RowsNPrecedingToUnboundedFollowingFramer struct {
 
 var _ sql.WindowFramer = (*RowsNPrecedingToUnboundedFollowingFramer)(nil)
 
-func NewRowsNPrecedingToUnboundedFollowingFramer(frame sql.WindowFrame) (sql.WindowFramer, error) {
+func NewRowsNPrecedingToUnboundedFollowingFramer(frame sql.WindowFrame, window *sql.Window) (sql.WindowFramer, error) {
 	startNPreceding, err := expression.LiteralToInt(frame.StartNPreceding())
 	if err != nil {
 		return nil, err
@@ -173,7 +175,7 @@ type RowsCurrentRowToNPrecedingFramer struct {
 
 var _ sql.WindowFramer = (*RowsCurrentRowToNPrecedingFramer)(nil)
 
-func NewRowsCurrentRowToNPrecedingFramer(frame sql.WindowFrame) (sql.WindowFramer, error) {
+func NewRowsCurrentRowToNPrecedingFramer(frame sql.WindowFrame, window *sql.Window) (sql.WindowFramer, error) {
 	startCurrentRow := true
 	endNPreceding, err := expression.LiteralToInt(frame.EndNPreceding())
 	if err != nil {
@@ -193,7 +195,7 @@ type RowsCurrentRowToCurrentRowFramer struct {
 
 var _ sql.WindowFramer = (*RowsCurrentRowToCurrentRowFramer)(nil)
 
-func NewRowsCurrentRowToCurrentRowFramer(frame sql.WindowFrame) (sql.WindowFramer, error) {
+func NewRowsCurrentRowToCurrentRowFramer(frame sql.WindowFrame, window *sql.Window) (sql.WindowFramer, error) {
 	startCurrentRow := true
 	endCurrentRow := true
 	return &RowsCurrentRowToCurrentRowFramer{
@@ -210,7 +212,7 @@ type RowsCurrentRowToNFollowingFramer struct {
 
 var _ sql.WindowFramer = (*RowsCurrentRowToNFollowingFramer)(nil)
 
-func NewRowsCurrentRowToNFollowingFramer(frame sql.WindowFrame) (sql.WindowFramer, error) {
+func NewRowsCurrentRowToNFollowingFramer(frame sql.WindowFrame, window *sql.Window) (sql.WindowFramer, error) {
 	startCurrentRow := true
 	endNFollowing, err := expression.LiteralToInt(frame.EndNFollowing())
 	if err != nil {
@@ -230,7 +232,7 @@ type RowsCurrentRowToUnboundedFollowingFramer struct {
 
 var _ sql.WindowFramer = (*RowsCurrentRowToUnboundedFollowingFramer)(nil)
 
-func NewRowsCurrentRowToUnboundedFollowingFramer(frame sql.WindowFrame) (sql.WindowFramer, error) {
+func NewRowsCurrentRowToUnboundedFollowingFramer(frame sql.WindowFrame, window *sql.Window) (sql.WindowFramer, error) {
 	startCurrentRow := true
 	unboundedFollowing := true
 	return &RowsCurrentRowToUnboundedFollowingFramer{
@@ -247,7 +249,7 @@ type RowsNFollowingToNPrecedingFramer struct {
 
 var _ sql.WindowFramer = (*RowsNFollowingToNPrecedingFramer)(nil)
 
-func NewRowsNFollowingToNPrecedingFramer(frame sql.WindowFrame) (sql.WindowFramer, error) {
+func NewRowsNFollowingToNPrecedingFramer(frame sql.WindowFrame, window *sql.Window) (sql.WindowFramer, error) {
 	startNFollowing, err := expression.LiteralToInt(frame.StartNFollowing())
 	if err != nil {
 		return nil, err
@@ -270,7 +272,7 @@ type RowsNFollowingToCurrentRowFramer struct {
 
 var _ sql.WindowFramer = (*RowsNFollowingToCurrentRowFramer)(nil)
 
-func NewRowsNFollowingToCurrentRowFramer(frame sql.WindowFrame) (sql.WindowFramer, error) {
+func NewRowsNFollowingToCurrentRowFramer(frame sql.WindowFrame, window *sql.Window) (sql.WindowFramer, error) {
 	startNFollowing, err := expression.LiteralToInt(frame.StartNFollowing())
 	if err != nil {
 		return nil, err
@@ -290,7 +292,7 @@ type RowsNFollowingToNFollowingFramer struct {
 
 var _ sql.WindowFramer = (*RowsNFollowingToNFollowingFramer)(nil)
 
-func NewRowsNFollowingToNFollowingFramer(frame sql.WindowFrame) (sql.WindowFramer, error) {
+func NewRowsNFollowingToNFollowingFramer(frame sql.WindowFrame, window *sql.Window) (sql.WindowFramer, error) {
 	startNFollowing, err := expression.LiteralToInt(frame.StartNFollowing())
 	if err != nil {
 		return nil, err
@@ -313,7 +315,7 @@ type RowsNFollowingToUnboundedFollowingFramer struct {
 
 var _ sql.WindowFramer = (*RowsNFollowingToUnboundedFollowingFramer)(nil)
 
-func NewRowsNFollowingToUnboundedFollowingFramer(frame sql.WindowFrame) (sql.WindowFramer, error) {
+func NewRowsNFollowingToUnboundedFollowingFramer(frame sql.WindowFrame, window *sql.Window) (sql.WindowFramer, error) {
 	startNFollowing, err := expression.LiteralToInt(frame.StartNFollowing())
 	if err != nil {
 		return nil, err
@@ -333,11 +335,16 @@ type RangeUnboundedPrecedingToNPrecedingFramer struct {
 
 var _ sql.WindowFramer = (*RangeUnboundedPrecedingToNPrecedingFramer)(nil)
 
-func NewRangeUnboundedPrecedingToNPrecedingFramer(frame sql.WindowFrame) (sql.WindowFramer, error) {
+func NewRangeUnboundedPrecedingToNPrecedingFramer(frame sql.WindowFrame, window *sql.Window) (sql.WindowFramer, error) {
 	unboundedPreceding := true
 	endNPreceding := frame.EndNPreceding()
+	exprs := window.OrderBy.ToExpressions()
+	if len(exprs) != 1 {
+		return nil, fmt.Errorf("a range's order by must be one expression")
+	}
 	return &RangeUnboundedPrecedingToNPrecedingFramer{
 		rangeFramerBase{
+			expr:               exprs[0],
 			unboundedPreceding: unboundedPreceding,
 			endNPreceding:      endNPreceding,
 		},
@@ -350,11 +357,16 @@ type RangeUnboundedPrecedingToCurrentRowFramer struct {
 
 var _ sql.WindowFramer = (*RangeUnboundedPrecedingToCurrentRowFramer)(nil)
 
-func NewRangeUnboundedPrecedingToCurrentRowFramer(frame sql.WindowFrame) (sql.WindowFramer, error) {
+func NewRangeUnboundedPrecedingToCurrentRowFramer(frame sql.WindowFrame, window *sql.Window) (sql.WindowFramer, error) {
 	unboundedPreceding := true
 	endCurrentRow := true
+	exprs := window.OrderBy.ToExpressions()
+	if len(exprs) != 1 {
+		return nil, fmt.Errorf("a range's order by must be one expression")
+	}
 	return &RangeUnboundedPrecedingToCurrentRowFramer{
 		rangeFramerBase{
+			expr:               exprs[0],
 			unboundedPreceding: unboundedPreceding,
 			endCurrentRow:      endCurrentRow,
 		},
@@ -367,11 +379,16 @@ type RangeUnboundedPrecedingToNFollowingFramer struct {
 
 var _ sql.WindowFramer = (*RangeUnboundedPrecedingToNFollowingFramer)(nil)
 
-func NewRangeUnboundedPrecedingToNFollowingFramer(frame sql.WindowFrame) (sql.WindowFramer, error) {
+func NewRangeUnboundedPrecedingToNFollowingFramer(frame sql.WindowFrame, window *sql.Window) (sql.WindowFramer, error) {
 	unboundedPreceding := true
 	endNFollowing := frame.EndNFollowing()
+	exprs := window.OrderBy.ToExpressions()
+	if len(exprs) != 1 {
+		return nil, fmt.Errorf("a range's order by must be one expression")
+	}
 	return &RangeUnboundedPrecedingToNFollowingFramer{
 		rangeFramerBase{
+			expr:               exprs[0],
 			unboundedPreceding: unboundedPreceding,
 			endNFollowing:      endNFollowing,
 		},
@@ -384,11 +401,16 @@ type RangeUnboundedPrecedingToUnboundedFollowingFramer struct {
 
 var _ sql.WindowFramer = (*RangeUnboundedPrecedingToUnboundedFollowingFramer)(nil)
 
-func NewRangeUnboundedPrecedingToUnboundedFollowingFramer(frame sql.WindowFrame) (sql.WindowFramer, error) {
+func NewRangeUnboundedPrecedingToUnboundedFollowingFramer(frame sql.WindowFrame, window *sql.Window) (sql.WindowFramer, error) {
 	unboundedPreceding := true
 	unboundedFollowing := true
+	exprs := window.OrderBy.ToExpressions()
+	if len(exprs) != 1 {
+		return nil, fmt.Errorf("a range's order by must be one expression")
+	}
 	return &RangeUnboundedPrecedingToUnboundedFollowingFramer{
 		rangeFramerBase{
+			expr:               exprs[0],
 			unboundedPreceding: unboundedPreceding,
 			unboundedFollowing: unboundedFollowing,
 		},
@@ -401,11 +423,16 @@ type RangeNPrecedingToNPrecedingFramer struct {
 
 var _ sql.WindowFramer = (*RangeNPrecedingToNPrecedingFramer)(nil)
 
-func NewRangeNPrecedingToNPrecedingFramer(frame sql.WindowFrame) (sql.WindowFramer, error) {
+func NewRangeNPrecedingToNPrecedingFramer(frame sql.WindowFrame, window *sql.Window) (sql.WindowFramer, error) {
 	startNPreceding := frame.StartNPreceding()
 	endNPreceding := frame.EndNPreceding()
+	exprs := window.OrderBy.ToExpressions()
+	if len(exprs) != 1 {
+		return nil, fmt.Errorf("a range's order by must be one expression")
+	}
 	return &RangeNPrecedingToNPrecedingFramer{
 		rangeFramerBase{
+			expr:            exprs[0],
 			startNPreceding: startNPreceding,
 			endNPreceding:   endNPreceding,
 		},
@@ -418,11 +445,16 @@ type RangeNPrecedingToCurrentRowFramer struct {
 
 var _ sql.WindowFramer = (*RangeNPrecedingToCurrentRowFramer)(nil)
 
-func NewRangeNPrecedingToCurrentRowFramer(frame sql.WindowFrame) (sql.WindowFramer, error) {
+func NewRangeNPrecedingToCurrentRowFramer(frame sql.WindowFrame, window *sql.Window) (sql.WindowFramer, error) {
 	startNPreceding := frame.StartNPreceding()
 	endCurrentRow := true
+	exprs := window.OrderBy.ToExpressions()
+	if len(exprs) != 1 {
+		return nil, fmt.Errorf("a range's order by must be one expression")
+	}
 	return &RangeNPrecedingToCurrentRowFramer{
 		rangeFramerBase{
+			expr:            exprs[0],
 			startNPreceding: startNPreceding,
 			endCurrentRow:   endCurrentRow,
 		},
@@ -435,11 +467,16 @@ type RangeNPrecedingToNFollowingFramer struct {
 
 var _ sql.WindowFramer = (*RangeNPrecedingToNFollowingFramer)(nil)
 
-func NewRangeNPrecedingToNFollowingFramer(frame sql.WindowFrame) (sql.WindowFramer, error) {
+func NewRangeNPrecedingToNFollowingFramer(frame sql.WindowFrame, window *sql.Window) (sql.WindowFramer, error) {
 	startNPreceding := frame.StartNPreceding()
 	endNFollowing := frame.EndNFollowing()
+	exprs := window.OrderBy.ToExpressions()
+	if len(exprs) != 1 {
+		return nil, fmt.Errorf("a range's order by must be one expression")
+	}
 	return &RangeNPrecedingToNFollowingFramer{
 		rangeFramerBase{
+			expr:            exprs[0],
 			startNPreceding: startNPreceding,
 			endNFollowing:   endNFollowing,
 		},
@@ -452,11 +489,16 @@ type RangeNPrecedingToUnboundedFollowingFramer struct {
 
 var _ sql.WindowFramer = (*RangeNPrecedingToUnboundedFollowingFramer)(nil)
 
-func NewRangeNPrecedingToUnboundedFollowingFramer(frame sql.WindowFrame) (sql.WindowFramer, error) {
+func NewRangeNPrecedingToUnboundedFollowingFramer(frame sql.WindowFrame, window *sql.Window) (sql.WindowFramer, error) {
 	startNPreceding := frame.StartNPreceding()
 	unboundedFollowing := true
+	exprs := window.OrderBy.ToExpressions()
+	if len(exprs) != 1 {
+		return nil, fmt.Errorf("a range's order by must be one expression")
+	}
 	return &RangeNPrecedingToUnboundedFollowingFramer{
 		rangeFramerBase{
+			expr:               exprs[0],
 			startNPreceding:    startNPreceding,
 			unboundedFollowing: unboundedFollowing,
 		},
@@ -469,11 +511,16 @@ type RangeCurrentRowToNPrecedingFramer struct {
 
 var _ sql.WindowFramer = (*RangeCurrentRowToNPrecedingFramer)(nil)
 
-func NewRangeCurrentRowToNPrecedingFramer(frame sql.WindowFrame) (sql.WindowFramer, error) {
+func NewRangeCurrentRowToNPrecedingFramer(frame sql.WindowFrame, window *sql.Window) (sql.WindowFramer, error) {
 	startCurrentRow := true
 	endNPreceding := frame.EndNPreceding()
+	exprs := window.OrderBy.ToExpressions()
+	if len(exprs) != 1 {
+		return nil, fmt.Errorf("a range's order by must be one expression")
+	}
 	return &RangeCurrentRowToNPrecedingFramer{
 		rangeFramerBase{
+			expr:            exprs[0],
 			startCurrentRow: startCurrentRow,
 			endNPreceding:   endNPreceding,
 		},
@@ -486,11 +533,16 @@ type RangeCurrentRowToCurrentRowFramer struct {
 
 var _ sql.WindowFramer = (*RangeCurrentRowToCurrentRowFramer)(nil)
 
-func NewRangeCurrentRowToCurrentRowFramer(frame sql.WindowFrame) (sql.WindowFramer, error) {
+func NewRangeCurrentRowToCurrentRowFramer(frame sql.WindowFrame, window *sql.Window) (sql.WindowFramer, error) {
 	startCurrentRow := true
 	endCurrentRow := true
+	exprs := window.OrderBy.ToExpressions()
+	if len(exprs) != 1 {
+		return nil, fmt.Errorf("a range's order by must be one expression")
+	}
 	return &RangeCurrentRowToCurrentRowFramer{
 		rangeFramerBase{
+			expr:            exprs[0],
 			startCurrentRow: startCurrentRow,
 			endCurrentRow:   endCurrentRow,
 		},
@@ -503,11 +555,16 @@ type RangeCurrentRowToNFollowingFramer struct {
 
 var _ sql.WindowFramer = (*RangeCurrentRowToNFollowingFramer)(nil)
 
-func NewRangeCurrentRowToNFollowingFramer(frame sql.WindowFrame) (sql.WindowFramer, error) {
+func NewRangeCurrentRowToNFollowingFramer(frame sql.WindowFrame, window *sql.Window) (sql.WindowFramer, error) {
 	startCurrentRow := true
 	endNFollowing := frame.EndNFollowing()
+	exprs := window.OrderBy.ToExpressions()
+	if len(exprs) != 1 {
+		return nil, fmt.Errorf("a range's order by must be one expression")
+	}
 	return &RangeCurrentRowToNFollowingFramer{
 		rangeFramerBase{
+			expr:            exprs[0],
 			startCurrentRow: startCurrentRow,
 			endNFollowing:   endNFollowing,
 		},
@@ -520,11 +577,16 @@ type RangeCurrentRowToUnboundedFollowingFramer struct {
 
 var _ sql.WindowFramer = (*RangeCurrentRowToUnboundedFollowingFramer)(nil)
 
-func NewRangeCurrentRowToUnboundedFollowingFramer(frame sql.WindowFrame) (sql.WindowFramer, error) {
+func NewRangeCurrentRowToUnboundedFollowingFramer(frame sql.WindowFrame, window *sql.Window) (sql.WindowFramer, error) {
 	startCurrentRow := true
 	unboundedFollowing := true
+	exprs := window.OrderBy.ToExpressions()
+	if len(exprs) != 1 {
+		return nil, fmt.Errorf("a range's order by must be one expression")
+	}
 	return &RangeCurrentRowToUnboundedFollowingFramer{
 		rangeFramerBase{
+			expr:               exprs[0],
 			startCurrentRow:    startCurrentRow,
 			unboundedFollowing: unboundedFollowing,
 		},
@@ -537,11 +599,16 @@ type RangeNFollowingToNPrecedingFramer struct {
 
 var _ sql.WindowFramer = (*RangeNFollowingToNPrecedingFramer)(nil)
 
-func NewRangeNFollowingToNPrecedingFramer(frame sql.WindowFrame) (sql.WindowFramer, error) {
+func NewRangeNFollowingToNPrecedingFramer(frame sql.WindowFrame, window *sql.Window) (sql.WindowFramer, error) {
 	startNFollowing := frame.StartNFollowing()
 	endNPreceding := frame.EndNPreceding()
+	exprs := window.OrderBy.ToExpressions()
+	if len(exprs) != 1 {
+		return nil, fmt.Errorf("a range's order by must be one expression")
+	}
 	return &RangeNFollowingToNPrecedingFramer{
 		rangeFramerBase{
+			expr:            exprs[0],
 			startNFollowing: startNFollowing,
 			endNPreceding:   endNPreceding,
 		},
@@ -554,11 +621,16 @@ type RangeNFollowingToCurrentRowFramer struct {
 
 var _ sql.WindowFramer = (*RangeNFollowingToCurrentRowFramer)(nil)
 
-func NewRangeNFollowingToCurrentRowFramer(frame sql.WindowFrame) (sql.WindowFramer, error) {
+func NewRangeNFollowingToCurrentRowFramer(frame sql.WindowFrame, window *sql.Window) (sql.WindowFramer, error) {
 	startNFollowing := frame.StartNFollowing()
 	endCurrentRow := true
+	exprs := window.OrderBy.ToExpressions()
+	if len(exprs) != 1 {
+		return nil, fmt.Errorf("a range's order by must be one expression")
+	}
 	return &RangeNFollowingToCurrentRowFramer{
 		rangeFramerBase{
+			expr:            exprs[0],
 			startNFollowing: startNFollowing,
 			endCurrentRow:   endCurrentRow,
 		},
@@ -571,11 +643,16 @@ type RangeNFollowingToNFollowingFramer struct {
 
 var _ sql.WindowFramer = (*RangeNFollowingToNFollowingFramer)(nil)
 
-func NewRangeNFollowingToNFollowingFramer(frame sql.WindowFrame) (sql.WindowFramer, error) {
+func NewRangeNFollowingToNFollowingFramer(frame sql.WindowFrame, window *sql.Window) (sql.WindowFramer, error) {
 	startNFollowing := frame.StartNFollowing()
 	endNFollowing := frame.EndNFollowing()
+	exprs := window.OrderBy.ToExpressions()
+	if len(exprs) != 1 {
+		return nil, fmt.Errorf("a range's order by must be one expression")
+	}
 	return &RangeNFollowingToNFollowingFramer{
 		rangeFramerBase{
+			expr:            exprs[0],
 			startNFollowing: startNFollowing,
 			endNFollowing:   endNFollowing,
 		},
@@ -588,11 +665,16 @@ type RangeNFollowingToUnboundedFollowingFramer struct {
 
 var _ sql.WindowFramer = (*RangeNFollowingToUnboundedFollowingFramer)(nil)
 
-func NewRangeNFollowingToUnboundedFollowingFramer(frame sql.WindowFrame) (sql.WindowFramer, error) {
+func NewRangeNFollowingToUnboundedFollowingFramer(frame sql.WindowFrame, window *sql.Window) (sql.WindowFramer, error) {
 	startNFollowing := frame.StartNFollowing()
 	unboundedFollowing := true
+	exprs := window.OrderBy.ToExpressions()
+	if len(exprs) != 1 {
+		return nil, fmt.Errorf("a range's order by must be one expression")
+	}
 	return &RangeNFollowingToUnboundedFollowingFramer{
 		rangeFramerBase{
+			expr:               exprs[0],
 			startNFollowing:    startNFollowing,
 			unboundedFollowing: unboundedFollowing,
 		},
