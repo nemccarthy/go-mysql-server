@@ -17,6 +17,7 @@ package enginetest
 import (
 	"context"
 	"fmt"
+	"net"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -24,11 +25,14 @@ import (
 
 	"github.com/dolthub/vitess/go/mysql"
 	"github.com/dolthub/vitess/go/sqltypes"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/gocraft/dbr/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/src-d/go-errors.v1"
 
 	sqle "github.com/dolthub/go-mysql-server"
+	"github.com/dolthub/go-mysql-server/server"
 	"github.com/dolthub/go-mysql-server/sql"
 	"github.com/dolthub/go-mysql-server/sql/analyzer"
 	"github.com/dolthub/go-mysql-server/sql/expression"
@@ -998,15 +1002,127 @@ func TestScripts(t *testing.T, harness Harness) {
 	}
 }
 
-func TestUsersAndPrivileges(t *testing.T, harness Harness) {
+func TestUserPrivileges(t *testing.T, h Harness) {
+	harness, ok := h.(ClientHarness)
+	if !ok {
+		t.Skip("Cannot run TestUserPrivileges as the harness must implement ClientHarness")
+	}
+
 	for _, script := range UserPrivTests {
 		t.Run(script.Name, func(t *testing.T) {
 			myDb := harness.NewDatabase("mydb")
 			databases := []sql.Database{myDb}
-			e := NewEngineWithDbs(t, harness, databases)
-			defer e.Close()
-			e.Analyzer.Catalog.GrantTables.AddRootAccount()
-			TestScriptWithEngine(t, e, harness, script)
+			engine := NewEngineWithDbs(t, harness, databases)
+			defer engine.Close()
+
+			ctx := NewContextWithClient(harness, sql.Client{
+				User:    "root",
+				Address: "localhost",
+			})
+			engine.Analyzer.Catalog.GrantTables.AddRootAccount()
+
+			for _, statement := range script.SetUpScript {
+				if sh, ok := harness.(SkippingHarness); ok {
+					if sh.SkipQueryTest(statement) {
+						t.Skip()
+					}
+				}
+				RunQueryWithContext(t, engine, ctx, statement)
+			}
+			for _, assertion := range script.Assertions {
+				if sh, ok := harness.(SkippingHarness); ok {
+					if sh.SkipQueryTest(assertion.Query) {
+						t.Skipf("Skipping query %s", assertion.Query)
+					}
+				}
+
+				user := assertion.User
+				host := assertion.Host
+				if user == "" {
+					user = "root"
+				}
+				if host == "" {
+					host = "localhost"
+				}
+				ctx := NewContextWithClient(harness, sql.Client{
+					User:    user,
+					Address: host,
+				})
+
+				if assertion.ExpectedErr != nil {
+					t.Run(assertion.Query, func(t *testing.T) {
+						AssertErrWithCtx(t, engine, ctx, assertion.Query, assertion.ExpectedErr)
+					})
+				} else {
+					t.Run(assertion.Query, func(t *testing.T) {
+						TestQueryWithContext(t, ctx, engine, assertion.Query, assertion.Expected, nil, nil)
+					})
+				}
+			}
+		})
+	}
+}
+
+func TestUserAuthentication(t *testing.T, h Harness) {
+	harness, ok := h.(ClientHarness)
+	if !ok {
+		t.Skip("Cannot run TestUserAuthentication as the harness must implement ClientHarness")
+	}
+
+	port := getEmptyPort(t)
+	for _, script := range ServerAuthTests {
+		t.Run(script.Name, func(t *testing.T) {
+			ctx := NewContextWithClient(harness, sql.Client{
+				User:    "root",
+				Address: "localhost",
+			})
+			serverConfig := server.Config{
+				Protocol:       "tcp",
+				Address:        fmt.Sprintf("localhost:%d", port),
+				MaxConnections: 1000,
+			}
+
+			engine := sqle.NewDefault(harness.NewDatabaseProvider())
+			engine.Analyzer.Catalog.GrantTables.AddRootAccount()
+			if script.SetUpFunc != nil {
+				script.SetUpFunc(ctx, t, engine)
+			}
+			for _, statement := range script.SetUpScript {
+				if sh, ok := harness.(SkippingHarness); ok {
+					if sh.SkipQueryTest(statement) {
+						t.Skip()
+					}
+				}
+				RunQueryWithContext(t, engine, ctx, statement)
+			}
+
+			s, err := server.NewDefaultServer(serverConfig, engine)
+			require.NoError(t, err)
+			go func() {
+				err := s.Start()
+				require.NoError(t, err)
+			}()
+			defer func() {
+				require.NoError(t, s.Close())
+			}()
+
+			for _, assertion := range script.Assertions {
+				conn, err := dbr.Open("mysql", fmt.Sprintf("%s:%s@tcp(localhost:%d)/",
+					assertion.Username, assertion.Password, port), nil)
+				require.NoError(t, err)
+				if assertion.ExpectedErr {
+					r, err := conn.Query(assertion.Query)
+					if !assert.Error(t, err) {
+						require.NoError(t, r.Close())
+					}
+				} else {
+					r, err := conn.Query(assertion.Query)
+					if assert.NoError(t, err) {
+						require.NoError(t, r.Close())
+					}
+				}
+				require.NoError(t, conn.Close())
+			}
 		})
 	}
 }
@@ -4487,9 +4603,23 @@ func TestPersist(t *testing.T, harness Harness, newPersistableSess func(ctx *sql
 
 var pid uint64
 
-func NewContext(harness Harness) *sql.Context {
-	ctx := harness.NewContext()
+func getEmptyPort(t *testing.T) int {
+	listener, err := net.Listen("tcp", ":0")
+	require.NoError(t, err)
+	port := listener.Addr().(*net.TCPAddr).Port
+	require.NoError(t, listener.Close())
+	return port
+}
 
+func NewContext(harness Harness) *sql.Context {
+	return newContextSetup(harness.NewContext())
+}
+
+func NewContextWithClient(harness ClientHarness, client sql.Client) *sql.Context {
+	return newContextSetup(harness.NewContextWithClient(client))
+}
+
+func newContextSetup(ctx *sql.Context) *sql.Context {
 	// Select a current database if there isn't one yet
 	if ctx.GetCurrentDatabase() == "" {
 		ctx.SetCurrentDatabase("mydb")
@@ -4536,7 +4666,7 @@ func NewSession(harness Harness) *sql.Context {
 // NewBaseSession returns a new BaseSession compatible with these tests. Most tests will work with any session
 // implementation, but for full compatibility use a session based on this one.
 func NewBaseSession() *sql.BaseSession {
-	return sql.NewBaseSessionWithClientServer("address", sql.Client{Address: "client", User: "user"}, 1)
+	return sql.NewBaseSessionWithClientServer("address", sql.Client{Address: "localhost", User: "root"}, 1)
 }
 
 func NewContextWithEngine(harness Harness, engine *sqle.Engine) *sql.Context {
