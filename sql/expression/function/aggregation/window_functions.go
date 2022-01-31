@@ -519,8 +519,8 @@ func (a *CountAgg) DefaultFramer() sql.WindowFramer {
 	if a.framer != nil {
 		return a.framer
 	}
+	// TODO: this should be a NewPeerGroupFramer
 	return NewPartitionFramer()
-	//return NewPeerGroupFramer()
 }
 
 func (a *CountAgg) StartPartition(ctx *sql.Context, interval sql.WindowInterval, buf sql.WindowBuffer) error {
@@ -1018,7 +1018,6 @@ func (a *PercentRank) Compute(ctx *sql.Context, interval sql.WindowInterval, buf
 // ex: [1, 2, 2, 2, 2, 3, 3, 4, 5, 5, 6] => {0,1}, {1,5}, {5,7}, {8,9}, {9,10}
 func nextPeerGroup(ctx *sql.Context, pos, partitionEnd int, orderBy []sql.Expression, buffer sql.WindowBuffer) (sql.WindowInterval, error) {
 	if pos >= partitionEnd || pos > len(buffer) {
-		// partition should align with buffer in practice
 		return sql.WindowInterval{}, nil
 	}
 	var row sql.Row

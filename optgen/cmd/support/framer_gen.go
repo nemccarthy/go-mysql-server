@@ -78,6 +78,7 @@ func (g *FramerGen) genNewFramer(def frameDef) {
 		fmt.Fprintf(g.w, "    return nil, fmt.Errorf(\"a range's order by must be one expression\")\n")
 		fmt.Fprintf(g.w, "  }\n")
 	}
+
 	fmt.Fprintf(g.w, "  return &%s{\n", framerName)
 	switch def.unit {
 	case rows:
@@ -85,7 +86,6 @@ func (g *FramerGen) genNewFramer(def frameDef) {
 	case rang:
 		fmt.Fprintf(g.w, "    rangeFramerBase{\n")
 		fmt.Fprintf(g.w, "      expr: exprs[0],\n")
-
 	}
 
 	for _, a := range def.Args() {

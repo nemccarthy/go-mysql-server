@@ -510,14 +510,14 @@ func (f *rangeFramerBase) Next(ctx *sql.Context, buf sql.WindowBuffer) (sql.Wind
 	return f.Interval()
 }
 
-type cmpDir int
+type stopCond int
 
 const (
 	greaterThan        = 1
 	greaterThanOrEqual = 0
 )
 
-func findInclusionBoundary(ctx *sql.Context, pos, searchStart, partitionEnd int, inclusion, expr sql.Expression, buf sql.WindowBuffer, stopCond cmpDir) (int, error) {
+func findInclusionBoundary(ctx *sql.Context, pos, searchStart, partitionEnd int, inclusion, expr sql.Expression, buf sql.WindowBuffer, stopCond stopCond) (int, error) {
 	i := searchStart
 	cur, err := inclusion.Eval(ctx, buf[pos])
 	if err != nil {
