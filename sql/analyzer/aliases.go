@@ -187,7 +187,7 @@ func normalizeExpression(ctx *sql.Context, tableAliases TableAliases, e sql.Expr
 	normalized, _ := expression.TransformUp(e, func(e sql.Expression) (sql.Expression, error) {
 		if field, ok := e.(*expression.GetField); ok {
 			table := field.Table()
-			if rt, ok := tableAliases[table]; ok {
+			if rt, ok := tableAliases[strings.ToLower(table)]; ok {
 				return field.WithTable(rt.Name()), nil
 			}
 		}
